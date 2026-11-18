@@ -2,7 +2,8 @@
 
 CSET-211 Statistical Machine Learning project, Bennett University. Author: Jia Jain.
 
-**Live app:** _link added after deployment_
+**Live app:** https://chess-predictor-jia.streamlit.app/  
+**Code (GitHub):** https://github.com/JiaJammy/chess-outcome-prediction
 
 ## What it does
 1. **Predicts the result** of a Lichess blitz game (White win / draw / Black win) using only the first
