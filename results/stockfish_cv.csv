@@ -1,0 +1,7 @@
+features,model,n_train_games,cv_acc_mean,cv_acc_std,cv_macroF1_mean,cv_always_white
+without Stockfish,Logistic Regression,200000,0.5602,0.0016,0.3785,0.4959
+without Stockfish,HistGradientBoosting,200000,0.5602,0.0011,0.3789,0.4959
+with Stockfish,Logistic Regression,200000,0.578,0.0016,0.3923,0.4959
+with Stockfish,HistGradientBoosting,200000,0.579,0.0025,0.3928,0.4959
+ratings + Stockfish only,Logistic Regression,200000,0.57,0.0024,0.3867,0.4959
+ratings + Stockfish only,HistGradientBoosting,200000,0.5701,0.0021,0.3864,0.4959

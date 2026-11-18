@@ -1,0 +1,14 @@
+# Python 3.13. Versions pinned = the versions the models were trained and tested with.
+streamlit==1.66.1
+pandas==2.3.3
+numpy==2.3.5
+scikit-learn==1.9.1
+scipy==1.18.1
+joblib==1.6.0
+chess==1.11.2
+matplotlib==3.10.8
+# below: only needed for the notebook and the data-building scripts (not by the app)
+seaborn==0.13.2
+pyarrow==26.0.1
+zstandard==0.25.0
+requests==2.34.2

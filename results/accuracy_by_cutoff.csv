@@ -1,0 +1,11 @@
+games,cutoff_move,cutoff_ply,n_games,n_train,n_test,test_acc_always_white,test_acc_ratings_logreg,test_macroF1_ratings_logreg,test_acc_hgb_all,test_macroF1_hgb_all
+still running after cutoff,10,20,191561,153248,38313,0.4957,0.5285,0.3486,0.5612,0.3805
+same games (running after move 30),10,20,109091,87272,21819,0.4754,0.512,0.3482,0.5416,0.3735
+still running after cutoff,15,30,180171,144136,36035,0.493,0.5243,0.3474,0.5978,0.4074
+same games (running after move 30),15,30,109091,87272,21819,0.4754,0.512,0.3482,0.5679,0.392
+still running after cutoff,20,40,161953,129562,32391,0.4885,0.5197,0.3476,0.6398,0.4379
+same games (running after move 30),20,40,109091,87272,21819,0.4754,0.512,0.3482,0.6031,0.417
+still running after cutoff,25,50,137478,109982,27496,0.4835,0.5194,0.3498,0.6686,0.4601
+same games (running after move 30),25,50,109091,87272,21819,0.4754,0.512,0.3482,0.6454,0.4464
+still running after cutoff,30,60,109091,87272,21819,0.4754,0.512,0.3482,0.6989,0.4854
+same games (running after move 30),30,60,109091,87272,21819,0.4754,0.512,0.3482,0.6989,0.4854

@@ -1,0 +1,89 @@
+[Event "Rated Blitz game"]
+[Site "https://lichess.org/WJh85dLD"]
+[Date "2025.01.01"]
+[White "fischfasch"]
+[Black "caymen3801"]
+[Result "1-0"]
+[UTCDate "2025.01.01"]
+[UTCTime "15:14:12"]
+[ECO "D06"]
+[Opening "Queen's Gambit Declined: Marshall Defense"]
+[Termination "Normal"]
+
+1. d4 d5 2. c4 Nf6 3. e3 Bf5 4. Nc3 e6 5. Nf3 h6 6. a3 Nc6 7. b4 a6 8. c5 Be7 9. Bd3 Bxd3 10. Qxd3 O-O 11. O-O Nd7 12. b5 axb5 13. Qxb5 Qb8 14. Bb2 Ra5 15. Qd3 f5 16. Rfb1 Qe8 17. Bc1 Bf6 18. Rxb7 Ra7 19. Rb3 e5 20. dxe5 Ncxe5 21. Nxe5 Bxe5 22. Nxd5 Nxc5 23. Qc4 Nxb3 24. Nf6+ Kh8 25. Nxe8 Nxa1 26. Qa2 Rxe8 27. Bb2 Nc2 28. Bxe5 Rxe5 29. Qxc2 Rxa3 30. g3 c5 31. Kg2 Kh7 32. Kf3 Kg6 33. Kf4 Re4+ 34. Kf3 Kg5 35. Qxc5 g6 36. Qxa3 1-0
+
+[Event "Rated Blitz game"]
+[Site "https://lichess.org/S5D1ooIC"]
+[Date "2025.01.01"]
+[White "Kishan_chanchal"]
+[Black "GambitoCat"]
+[Result "1-0"]
+[UTCDate "2025.01.01"]
+[UTCTime "15:14:12"]
+[TimeControl "180+2"]
+[ECO "C41"]
+[Opening "Philidor Defense"]
+[Termination "Normal"]
+
+1. e4 e5 2. Nf3 d6 3. Bc4 h6 4. d4 exd4 5. Nxd4 Nf6 6. Nc3 Be7 7. O-O O-O 8. Kh1 Nc6 9. f4 Nxd4 10. Qxd4 a6 11. Rf3? b5 12. Bd3? c5 13. Qe3 c4 14. Be2 Bg4? 15. Rg3 Bxe2 16. Qxe2 d5? 17. f5?? d4?? 18. Bxh6 dxc3?? 19. Bxg7 Kh7?? 20. Bxf6 Bxf6 21. Qh5# 1-0
+
+[Event "Rated Blitz game"]
+[Site "https://lichess.org/BpIWl0OG"]
+[Date "2025.01.01"]
+[White "Grig1959"]
+[Black "tom_the_frick"]
+[Result "1/2-1/2"]
+[UTCDate "2025.01.01"]
+[UTCTime "15:14:12"]
+[TimeControl "180+2"]
+[ECO "B29"]
+[Opening "Sicilian Defense: Nimzowitsch Variation, Closed Variation"]
+[Termination "Normal"]
+
+1. e4 c5 2. Nf3 Nf6 3. Nc3 Nc6 4. d4 d5 5. exd5 Nxd5 6. Nxd5 Qxd5 7. Be3 cxd4 8. Nxd4 e5 9. Nb5 Bb4+ 10. c3 Qxd1+ 11. Rxd1 Ba5 12. Nd6+ Ke7 13. Bc5 Kf6 14. Bc4 Be6 15. Ne4+ Kg6 16. Bxe6 fxe6 17. h4 Rhd8 18. O-O Rxd1 19. Rxd1 Rd8 20. Re1 h6 21. Bd6 Rd7 22. b4 Bc7 23. Rd1 Bxd6 24. Rxd6 Rxd6 25. Nxd6 Nd8 26. g4 Kf6 27. Kg2 Ke7 28. Nc4 Kf6 29. Kf3 b5 30. Nd6 a6 31. Ke4 Ke7 32. Nc8+ Kd7 33. Na7 Kc7 34. Kxe5 Kb7 35. Kd6 Kxa7 36. Kd7 Nb7 37. Kxe6 Kb6 38. Kf7 g5 39. h5 Nd6+ 40. Kg6 Kc6 41. Kxh6 Kd5 42. Kg7 Ke6 43. h6 Ne8+ 44. Kg6 Nd6 45. h7 Nf7 46. Kg7 Nh8 47. Kh6 Kf6 48. a3 Nf7+ 49. Kh5 Nh8 50. Kh6 Nf7+ 51. Kh5 Kg7 52. h8=Q+ Kxh8 53. Kg6 Kg8 54. Kf6 Kf8 55. f3 Kg8 56. Kf5 Kg7 57. f4 gxf4 58. Kxf4 Kf6 59. Ke4 Ke6 60. Kd4 Kd6 61. c4 bxc4 62. a4 Ne5 63. g5 Nf3+ 64. Kxc4 Nxg5 65. b5 a5 66. b6 Kc6 67. b7 Kxb7 68. Kb5 Kc7 69. Kxa5 Kc6 70. Kb4 Ne6 71. a5 Nc5 72. a6 Nxa6+ 1/2-1/2
+
+[Event "Rated Blitz game"]
+[Site "https://lichess.org/3jqiqux7"]
+[Date "2025.01.01"]
+[White "capa104"]
+[Black "aaronc1"]
+[Result "0-1"]
+[UTCDate "2025.01.01"]
+[UTCTime "15:14:12"]
+[TimeControl "180+2"]
+[ECO "C17"]
+[Opening "French Defense: Winawer Variation, Advance Variation"]
+[Termination "Normal"]
+
+1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. Nf3 cxd4 6. Nxd4 Nc6 7. Nf3 Nge7 8. Bg5 Bxc3+ 9. bxc3 O-O 10. Bd3 h6 11. Bh4 Qd7 12. O-O b6 13. a4 Bb7 14. Bb5 a6 15. Bd3 Ng6 16. Bg3 d4 17. cxd4 Nxd4 18. Nxd4 Qxd4 19. Bxg6 Qxd1 20. Bxf7+ Rxf7 21. Rfxd1 Bd5 22. h3 Rc8 23. Rd2 Rfc7 24. Rc1 b5 25. axb5 axb5 26. f4 b4 27. f5 b3 28. fxe6 Bxe6 29. Rd6 b2 30. Rb1 Rxc2 31. Rb6 Rc1+ 0-1
+
+[Event "Rated Blitz game"]
+[Site "https://lichess.org/dVWB4C2F"]
+[Date "2025.01.01"]
+[White "barislni"]
+[Black "Rezaasghary3560"]
+[Result "1-0"]
+[UTCDate "2025.01.01"]
+[UTCTime "15:14:12"]
+[TimeControl "180+2"]
+[ECO "A06"]
+[Opening "Zukertort Opening: Tennison Gambit"]
+[Termination "Time forfeit"]
+
+1. e4 d5 2. Nf3 dxe4 3. Nd4 Nf6 4. d3 exd3 5. Qxd3 e5 6. Nf5 Qxd3 7. Bxd3 g6 8. Ng3 Bc5 9. h3 O-O 10. Bh6 Re8 11. O-O Be6 12. Bg5 Be7 13. Re1 Nc6 14. Nc3 Nd4 15. Be3 Bf5 16. Nb5 Bd6 17. Bxf5 gxf5 18. Rac1 Nxb5 19. c4 f4 20. Bd2 fxg3 21. cxb5 gxf2+ 22. Kxf2 e4 23. Bg5 Kg7 24. h4 Nh5 25. a4 Bf4 26. Rcd1 Bxg5 27. hxg5 Nf4 28. g3 e3+ 29. Rxe3 Rxe3 30. Kxe3 Ng2+ 31. Kf2 1-0
+
+[Event "Rated Blitz game"]
+[Site "https://lichess.org/IbyndncK"]
+[Date "2025.01.01"]
+[White "Bjam1"]
+[Black "IL79"]
+[Result "1-0"]
+[UTCDate "2025.01.01"]
+[UTCTime "15:14:12"]
+[TimeControl "180+2"]
+[ECO "C45"]
+[Opening "Scotch Game"]
+[Termination "Normal"]
+
+1. e4 e5 2. Nf3 Nc6 3. d4 exd4 4. Nxd4 d5 5. Nxc6 bxc6 6. e5 Be6 7. Bf4 Rb8 8. b3 Ne7 9. Bd3 Nf5 10. O-O h6 11. Nd2 Bb4 12. a3 Bc3 13. Ra2 d4 14. Ne4 Ba5 15. b4 Bb6 16. Rb2 a5 17. Qe1 O-O 18. c3 axb4 19. cxb4 Bd5 20. Ng3 Nxg3 21. Bxg3 Be6 22. f4 c5 23. f5 Bd5 24. Bf2 cxb4 25. Rxb4 Ba5 26. Rxd4 Bxe1 27. Rxe1 c6 28. Be4 Qg5 29. Bxd5 cxd5 30. g4 Rfd8 31. h4 Qe7 32. e6 Qxa3 33. exf7+ Kxf7 34. Re6 Qa1+ 35. Kg2 Qxd4 36. Bxd4 g6 37. Rxg6 Rb4 38. Rf6+ Kg8 39. Rg6+ Kh7 40. Rg7+ Kh8 41. Rd7+ Rxd4 42. Rxd8+ Kh7 43. Kf3 Rd1 44. h5 Kg7 45. Rd7+ Kf6 46. Rd6+ Kg7 47. Ke2 Rg1 48. Rg6+ Kf7 49. Kf2 Rd1 50. Rxh6 d4 51. Rd6 d3 52. Ke3 Rg1 53. Rg6 Rg3+ 54. Kd2 Kf8 55. h6 Kf7 56. g5 Rh3 57. Rg7+ Kf8 58. f6 Ke8 59. h7 Kf8 60. Rg8+ Kf7 61. Rg7+ Kf8 62. g6 Rh4 63. Rg8# 1-0
+

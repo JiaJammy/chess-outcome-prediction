@@ -1,0 +1,5 @@
+model_at_least_sure,n_test_games,share_of_test,test_acc,test_acc_always_white_same_games
+all games,200000,1.0,0.5809,0.4964
+>= 60%,61721,0.3086,0.698,0.5269
+>= 70%,25564,0.1278,0.7853,0.5506
+>= 80%,8362,0.0418,0.8795,0.5814

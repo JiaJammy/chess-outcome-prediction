@@ -1,0 +1,41 @@
+games 623,722; players with >= 5 games: 83,870
+                      avg_castle_ply  castle_rate  avg_captures  avg_material_swing  avg_minors_developed  avg_mobility  opening_variety
+avg_castle_ply                  1.00        -0.88          0.23                0.25                 -0.20          0.08            -0.09
+castle_rate                    -0.88         1.00         -0.24               -0.28                  0.32         -0.04             0.11
+avg_captures                    0.23        -0.24          1.00                0.78                 -0.17          0.02             0.07
+avg_material_swing              0.25        -0.28          0.78                1.00                 -0.20         -0.14             0.01
+avg_minors_developed           -0.20         0.32         -0.17               -0.20                  1.00          0.31             0.14
+avg_mobility                    0.08        -0.04          0.02               -0.14                  0.31          1.00             0.11
+opening_variety                -0.09         0.11          0.07                0.01                  0.14          0.11             1.00
+                                method  groups  largest_group_share  noise_share  silhouette  agreement_with_kmeans_ARI  same_opening_variety_in_group
+  K-Means (k=3, fitted on all players)       3               0.3847       0.0000      0.1624                     1.0000                         0.5103
+Hierarchical, Ward (cut into 3 groups)       3               0.3617       0.0000      0.1007                     0.3382                         0.5443
+      DBSCAN (eps=0.6, min_samples=14)       1               0.0127       0.9873         NaN                    -0.0023                         1.0000
+      DBSCAN (eps=0.8, min_samples=14)       2               0.2177       0.7210      0.1512                     0.0100                         1.0000
+      DBSCAN (eps=1.0, min_samples=14)       4               0.3923       0.3823      0.0427                     0.0533                         1.0000
+      DBSCAN (eps=1.2, min_samples=14)       3               0.4640       0.2080      0.0850                     0.0477                         1.0000
+      DBSCAN (eps=1.5, min_samples=14)       1               0.9357       0.0643         NaN                     0.0217                         0.5322
+group                             0              1         2 all players
+name                      Developer  Early castler  Tactical            
+players                     31920.0        30520.0   21430.0     83870.0
+share                         0.381          0.364     0.256         1.0
+avg_castle_ply               18.967         15.611    19.329      17.838
+castle_rate                    0.38          0.748     0.295       0.492
+avg_captures                  1.482          1.369     2.048       1.585
+avg_material_swing             2.71           2.54     4.364       3.071
+avg_minors_developed          3.208          3.155     2.737       3.068
+avg_mobility                 37.998         35.547    34.662      36.254
+opening_variety               0.874          0.878     0.834       0.865
+n_games                      11.863         11.768    10.222      11.409
+describe_only_avg_rating     1706.0         1733.0    1396.0      1636.0
+describe_only_avg_score       0.512          0.509     0.495       0.507
+PCA loadings:
+                         PC1    PC2
+avg_castle_ply       -0.492 -0.423
+castle_rate           0.515  0.417
+avg_captures         -0.428  0.524
+avg_material_swing   -0.452  0.508
+avg_minors_developed  0.309  0.058
+avg_mobility          0.064 -0.152
+opening_variety       0.076  0.296
+saved models/style_kmeans.joblib

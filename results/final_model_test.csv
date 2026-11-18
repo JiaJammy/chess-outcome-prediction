@@ -1,0 +1,2 @@
+model,tuned,params,n_train,n_test,test_acc,test_macroF1,test_acc_always_white,train_cv_acc,predicted_draws
+Soft voting (LR+LDA+HGB),True,"{""hgb__learning_rate"": 0.030515616964102342, ""hgb__min_samples_leaf"": 234, ""weights"": [1, 0, 1]}",200000,200000,0.5809,0.3945,0.4964,0.58,0

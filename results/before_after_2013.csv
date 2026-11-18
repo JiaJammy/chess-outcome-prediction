@@ -1,0 +1,4 @@
+model,features,test_acc,test_macroF1
+always White (baseline),-,0.51,
+before: Random Forest balanced (midterm),12 features,0.6245,0.4289
+after: Logistic Regression,52 features,0.6621,0.4471

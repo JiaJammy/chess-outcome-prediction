@@ -1,0 +1,5 @@
+model,cv_acc_mean,cv_acc_std,cv_macroF1_mean,cv_always_white,n_train,secs
+Soft voting (LR+LDA+HGB),0.5793,0.0021,0.393,0.4959,200000,23
+HistGradientBoosting,0.579,0.0025,0.3928,0.4959,200000,8
+Logistic Regression,0.578,0.0016,0.3923,0.4959,200000,9
+LDA,0.5772,0.0019,0.3916,0.4959,200000,7

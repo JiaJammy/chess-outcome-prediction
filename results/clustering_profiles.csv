@@ -1,0 +1,5 @@
+group,name,players,share,avg_castle_ply,castle_rate,avg_captures,avg_material_swing,avg_minors_developed,avg_mobility,opening_variety,n_games,describe_only_avg_rating,describe_only_avg_score
+0,Developer,31920.0,0.381,18.967,0.38,1.482,2.71,3.208,37.998,0.874,11.863,1706.0,0.512
+1,Early castler,30520.0,0.364,15.611,0.748,1.369,2.54,3.155,35.547,0.878,11.768,1733.0,0.509
+2,Tactical,21430.0,0.256,19.329,0.295,2.048,4.364,2.737,34.662,0.834,10.222,1396.0,0.495
+all players,,83870.0,1.0,17.838,0.492,1.585,3.071,3.068,36.254,0.865,11.409,1636.0,0.507

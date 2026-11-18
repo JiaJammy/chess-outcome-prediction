@@ -1,0 +1,2 @@
+model,tuned,params,n_train,n_test,test_acc,test_macroF1,test_acc_always_white,train_cv_acc_default,train_cv_acc_tuned
+Logistic Regression,True,"{""logisticregression__C"": 0.4205156450913872}",498977,638827,0.5622,0.3806,0.4949,0.5589,0.5589

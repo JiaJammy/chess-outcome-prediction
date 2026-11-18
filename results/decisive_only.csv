@@ -1,0 +1,2 @@
+task,model,n_train,train_cv_acc,train_cv_std,n_test,test_acc,test_macroF1,test_acc_always_white
+decisive only (White win vs Black win),Soft voting (LR+LDA+HGB),191354,0.6056,0.0026,190817,0.6079,0.6049,0.5203

@@ -1,0 +1,26 @@
+# "Keep list": everything in the project folder is left OUT of GitHub unless it is named below.
+# (so the report, PPT, private notes, big data files and the Stockfish exe never get uploaded by accident)
+/*
+!/.gitignore
+!/README.md
+!/app.py
+!/requirements.txt
+!/packages.txt
+!/src/
+!/models/
+!/results/
+!/notebook/
+!/data/
+
+# data: only the small files (big files are rebuilt with src/download_data.py + src/build_dataset.py)
+/data/*
+!/data/demo_games.pgn
+!/data/sample_pgn/
+!/data/sample/
+!/data/raw_games.csv
+!/data/games_2013_01_all.csv.gz
+
+# never
+__pycache__/
+*.pyc
+.ipynb_checkpoints/

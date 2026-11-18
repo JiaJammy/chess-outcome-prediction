@@ -1,0 +1,8 @@
+method,groups,largest_group_share,noise_share,silhouette,agreement_with_kmeans_ARI,same_opening_variety_in_group
+"K-Means (k=3, fitted on all players)",3,0.3847,0.0,0.1624,1.0,0.5103
+"Hierarchical, Ward (cut into 3 groups)",3,0.3617,0.0,0.1007,0.3382,0.5443
+"DBSCAN (eps=0.6, min_samples=14)",1,0.0127,0.9873,,-0.0023,1.0
+"DBSCAN (eps=0.8, min_samples=14)",2,0.2177,0.721,0.1512,0.01,1.0
+"DBSCAN (eps=1.0, min_samples=14)",4,0.3923,0.3823,0.0427,0.0533,1.0
+"DBSCAN (eps=1.2, min_samples=14)",3,0.464,0.208,0.085,0.0477,1.0
+"DBSCAN (eps=1.5, min_samples=14)",1,0.9357,0.0643,,0.0217,0.5322
