@@ -1,0 +1,19 @@
+game,white,black,result,cutoff_move,sf19_pawns,sf17_pawns,sf19_white_pct,sf17_white_pct,sf19_black_pct,sf17_black_pct,sf19_most_likely,sf17_most_likely,pawns_diff,white_pct_diff,most_likely_changed
+1,bringerwar,lancelotukr,0-1,15.0,-0.27,0.18,31.4,34.4,64.1,60.9,Black win,Black win,0.45,3.0,False
+2,bringerwar,rashit49,0-1,30.0,-10.0,-8.89,3.9,4.9,94.2,93.0,Black win,Black win,1.11,1.0,False
+3,bringerwar,Messsi,0-1,30.0,0.0,0.0,24.2,24.2,65.9,65.9,Black win,Black win,0.0,0.0,False
+4,bringerwar,balex,1-0,30.0,7.94,6.81,77.6,73.6,18.4,22.0,White win,White win,-1.13,-4.0,False
+5,bringerwar,143,1-0,30.0,-5.6,-4.58,13.3,16.3,79.7,76.3,Black win,Black win,1.02,3.0,False
+6,bringerwar,garderob,0-1,30.0,-5.56,-4.11,7.0,8.9,89.8,87.7,Black win,Black win,1.45,1.9,False
+7,Artem84,sempes,1-0,30.0,6.71,10.0,73.0,85.2,19.4,9.7,White win,White win,3.29,12.2,False
+8,tamachi,pronik,1-0,30.0,-1.38,-0.61,37.2,39.1,49.7,46.5,Black win,Black win,0.77,1.9,False
+9,Vlad97pol,brigoodwinan,1-0,30.0,6.71,5.95,72.8,69.7,21.0,23.4,White win,White win,-0.76,-3.1,False
+10,spaday,lipapa,0-1,30.0,-8.46,-8.46,4.1,4.1,92.0,92.0,Black win,Black win,0.0,0.0,False
+11,ajay_jangir,hogy,0-1,30.0,-7.73,-4.3,4.0,7.2,93.8,89.7,Black win,Black win,3.43,3.2,False
+12,2bleHunder,DarkKnight7,0-1,30.0,-7.14,-7.79,6.7,6.0,89.0,89.8,Black win,Black win,-0.65,-0.7,False
+13,jack0211,pikaron,1/2-1/2,30.0,-7.37,-5.0,6.2,10.3,90.5,85.5,Black win,Black win,2.37,4.1,False
+14,burnoksan,Kiriush,1/2-1/2,30.0,-0.1,-0.21,46.1,44.1,28.2,32.2,White win,White win,-0.11,-2.0,False
+15,doncles,kostik,1-0,15.0,7.51,6.01,91.4,89.7,7.1,8.6,White win,White win,-1.5,-1.7,False
+16,vnelly,vaacshes,0-1,20.0,-8.61,-6.15,5.9,9.3,91.3,87.5,Black win,Black win,2.46,3.4,False
+17,vikings,Clauss34,0-1,,,,,,,,–,–,,,False
+18,arina1999,Sa052,1-0,,,,,,,,–,–,,,False
