@@ -15,25 +15,24 @@
     font-family: 'Josefin Sans', 'Montserrat', Arial, sans-serif; font-weight: 200; letter-spacing: .34em;
     font-size: clamp(20px, 3.3vw, 40px); text-transform: uppercase; padding-left: .34em; white-space: nowrap; }
   .title:before, .title:after { content: ""; width: clamp(26px, 8vw, 120px); height: 1px; background: rgba(245,245,245,.75); }
-  .tag { transform: translateZ(0); margin-top: 12px; font-size: 12px; font-weight: 400; letter-spacing: .42em; color: #8a8a8a; text-transform: uppercase;
-    font-family: 'Josefin Sans', Arial, sans-serif; padding-left: .42em; }
+  .tag { transform: translateZ(0); margin-top: 12px; font-size: 12px; font-weight: 400; letter-spacing: .42em; color: #8a8a8a;
+    text-transform: uppercase; font-family: 'Josefin Sans', Arial, sans-serif; padding-left: .42em; }
   .stage { position: relative; flex: 1; width: 100%; min-height: 280px; cursor: pointer; }
   .stage canvas { display: block; position: absolute; inset: 0; z-index: 0; }
-  /* darker surroundings: a soft dark ring that blends the scene into the page colour */
   .vignette { position: absolute; inset: 0; z-index: 1; pointer-events: none;
     box-shadow: inset 0 0 70px 30px #111216; }   /* edges fade into the page colour */
-  /* GET STARTED: always above the 3D scene (z-index 3), white text in a thin white box */
+  /* GET STARTED: always above the 3D scene (z-index 3). The script moves it onto the empty middle of the board. */
   .cta { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 3;
-    font-family: 'Josefin Sans', Arial, sans-serif; font-weight: 400; letter-spacing: .5em; font-size: 15px;
-    padding: 15px 24px 13px 32px; border: 1px solid #ffffff; color: #ffffff; white-space: nowrap;
-    background: rgba(8,9,11,.72); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+    font-family: 'Josefin Sans', Arial, sans-serif; font-weight: 400; letter-spacing: .5em; font-size: 14px;
+    padding: 13px 22px 11px 30px; border: 1px solid #ffffff; color: #ffffff; white-space: nowrap;
+    background: rgba(14,15,18,.55); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
     cursor: pointer; animation: pulse 2.5s ease-in-out infinite; transition: opacity .4s; }
   @keyframes pulse { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
   .cta.gone { animation: none; opacity: 0; }
   .fallback { display: none; position: absolute; inset: 0; z-index: 2; align-items: center; justify-content: center; flex-direction: column; gap: 30px; }
   .fallback svg { width: min(56vh, 70vw); transform: perspective(900px) rotateX(48deg) rotateZ(-24deg); }
   .fallback .cta { position: static; transform: none; animation: none; opacity: 1; }
-  @media (max-width: 520px) { .cta { font-size: 12px; letter-spacing: .35em; padding: 12px 16px 10px 20px; } .top svg { height: 60px; } }
+  @media (max-width: 520px) { .cta { font-size: 11px; letter-spacing: .32em; padding: 10px 12px 8px 16px; } .top svg { height: 60px; } }
   @media (prefers-reduced-motion: reduce) { .cta { animation: none; opacity: 1; } }
 </style>
 </head>
@@ -70,9 +69,9 @@ function showFallback() {
   document.getElementById('cta').style.display = 'none';
   let sq = '';
   for (let r = 0; r < 8; r++) for (let f = 0; f < 8; f++)
-    sq += `<rect x="${10 + f * 10}" y="${10 + r * 10}" width="10" height="10" fill="${(r + f) % 2 ? '#050505' : '#f4f4f4'}"/>`;
+    sq += `<rect x="${10 + f * 10}" y="${10 + r * 10}" width="10" height="10" fill="${(r + f) % 2 ? '#1e1f22' : '#d8d8d6'}"/>`;
   const fb = document.getElementById('fallback');
-  fb.innerHTML = `<svg viewBox="0 0 100 100"><rect x="2" y="2" width="96" height="96" fill="#070708" stroke="#c9ccd1" stroke-width=".6"/>${sq}</svg>
+  fb.innerHTML = `<svg viewBox="0 0 100 100"><rect x="2" y="2" width="96" height="96" fill="#16171a" stroke="#b9bcc2" stroke-width=".6"/>${sq}</svg>
                   <div class="cta" onclick="goPredict()">GET STARTED</div>`;
   fb.style.display = 'flex';
 }
@@ -82,93 +81,89 @@ function hasWebGL() {
         return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl'))); }
   catch (e) { return false; }
 }
+function loadScript(src) {
+  return new Promise((ok, fail) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = fail; document.head.appendChild(s); });
+}
 
 if (!hasWebGL()) showFallback();
 else {
-  const s = document.createElement('script');
-  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
-  s.onload = () => { try { init(); } catch (e) { console.error(e); showFallback(); } };
-  s.onerror = showFallback;
-  document.head.appendChild(s);
   setTimeout(() => { if (!window.THREE) showFallback(); }, 9000);
+  loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js')
+    // the soft studio light (RoomEnvironment) is an official three.js extra; if it fails we use our own
+    .then(() => loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js').catch(() => {}))
+    .then(() => { try { init(); } catch (e) { console.error(e); showFallback(); } })
+    .catch(showFallback);
 }
 
 // ---------- the 3D scene ----------
 function init() {
   const stage = document.getElementById('stage');
-  const renderer = new THREE.WebGLRenderer({ antialias: true, stencil: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  const renderer = new THREE.WebGLRenderer({ antialias: true, stencil: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
   renderer.setClearColor(0x0e0f12, 1);
   renderer.outputEncoding = THREE.sRGBEncoding;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.1;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;    // soft, film-like contrast
+  renderer.toneMappingExposure = 0.8;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   stage.prepend(renderer.domElement);
 
   const scene = new THREE.Scene();
 
-  // a painted "studio": dark walls with soft light boxes -> glossy highlights on pieces and frame
-  const ec = document.createElement('canvas'); ec.width = 1024; ec.height = 512;
-  const g = ec.getContext('2d');
-  const grad = g.createLinearGradient(0, 0, 0, 512);
-  grad.addColorStop(0, '#2a2b30'); grad.addColorStop(.5, '#0e0f12'); grad.addColorStop(1, '#050506');
-  g.fillStyle = grad; g.fillRect(0, 0, 1024, 512);
-  function softbox(x, y, rx, ry, a) {
-    g.save(); g.translate(x, y); g.scale(1, ry / rx);
-    const rg = g.createRadialGradient(0, 0, 0, 0, 0, rx);
-    rg.addColorStop(0, `rgba(255,255,255,${a})`); rg.addColorStop(.5, `rgba(255,255,255,${a * .6})`); rg.addColorStop(1, 'rgba(255,255,255,0)');
-    g.fillStyle = rg; g.beginPath(); g.arc(0, 0, rx, 0, Math.PI * 2); g.fill(); g.restore();
-  }
-  softbox(230, 80, 150, 50, 1); softbox(690, 100, 200, 40, .8); softbox(940, 220, 60, 120, .5); softbox(470, 60, 60, 25, .9);
-  const envTex = new THREE.CanvasTexture(ec);
-  envTex.mapping = THREE.EquirectangularReflectionMapping; envTex.encoding = THREE.sRGBEncoding;
+  // soft studio light and reflections: a small white "room" rendered into an environment map
   const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromEquirectangular(envTex).texture;
+  if (THREE.RoomEnvironment) {
+    scene.environment = pmrem.fromScene(new THREE.RoomEnvironment(), 0.04).texture;
+  } else {   // backup: a painted dark studio with soft light boxes
+    const ec = document.createElement('canvas'); ec.width = 1024; ec.height = 512;
+    const g = ec.getContext('2d');
+    const grad = g.createLinearGradient(0, 0, 0, 512);
+    grad.addColorStop(0, '#9a9a9a'); grad.addColorStop(.5, '#4a4a4c'); grad.addColorStop(1, '#202022');
+    g.fillStyle = grad; g.fillRect(0, 0, 1024, 512);
+    const t = new THREE.CanvasTexture(ec); t.mapping = THREE.EquirectangularReflectionMapping; t.encoding = THREE.sRGBEncoding;
+    scene.environment = pmrem.fromEquirectangular(t).texture;
+  }
 
-  // lights: soft key light with shadows, a rim light from behind, a gentle fill
-  const key = new THREE.DirectionalLight(0xffffff, 1.6);
-  key.position.set(-7, 12, -6); key.castShadow = true;
+  // lights: one soft key light from the upper left (with soft shadows), a weak fill, a little ambient
+  const key = new THREE.DirectionalLight(0xffffff, 1.1);
+  key.position.set(-7, 11, 4); key.castShadow = true;
   key.shadow.mapSize.set(2048, 2048);
-  Object.assign(key.shadow.camera, { left: -6, right: 6, top: 6, bottom: -6, near: 1, far: 40 });
-  key.shadow.bias = -0.0004; key.shadow.normalBias = 0.02;
+  Object.assign(key.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8, near: 1, far: 40 });
+  key.shadow.bias = -0.0004; key.shadow.normalBias = 0.02; key.shadow.radius = 4;
   scene.add(key);
-  // (placed low behind, so its mirror image on the flat frame does not shine into the camera)
-  const rim = new THREE.DirectionalLight(0xffffff, 0.9); rim.position.set(2, 3, -10); scene.add(rim);
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x000000, 0.55));
+  const fill = new THREE.DirectionalLight(0xffffff, 0.3); fill.position.set(7, 4, 8); scene.add(fill);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.15));
 
-  // materials (colours given in normal screen colours, converted for three.js)
+  // materials (colours written as normal screen colours, converted for three.js)
   const C = (hex) => new THREE.Color(hex).convertSRGBToLinear();
   const P = (o) => { o.color = C(o.color); return new THREE.MeshPhysicalMaterial(o); };
-  const matWhite  = P({ color: 0xf6f6f6, roughness: .16, clearcoat: 1, clearcoatRoughness: .05 });
-  const matBlack  = P({ color: 0x060606, roughness: .14, clearcoat: 1, clearcoatRoughness: .03, envMapIntensity: 1.4 });
-  const matFrame  = new THREE.MeshStandardMaterial({ color: C(0x050506), roughness: .3, metalness: 0, envMapIntensity: .06 });
-  const matSilver = P({ color: 0xd4d7dc, metalness: 1, roughness: .18 });
-  const slitOnWhite = P({ color: 0x1c1c1e, roughness: .4 });
-  const slitOnBlack = P({ color: 0x3a3b40, roughness: .3, metalness: .2 });
-  // squares: pure flat white / black (no tone mapping -> crisp, no grey gradient); a little see-through,
-  // so the mirror copy of the pieces underneath shows as a soft reflection
-  // (MeshBasicMaterial = not affected by light, so every white square is the same pure white)
-  const matSqW = new THREE.MeshBasicMaterial({ color: C(0xffffff), transparent: true, opacity: .92, toneMapped: false });
-  const matSqB = new THREE.MeshBasicMaterial({ color: C(0x000000), transparent: true, opacity: .8, toneMapped: false });
+  const matWhite  = P({ color: 0xe4e4e2, roughness: .38, clearcoat: .5, clearcoatRoughness: .25, envMapIntensity: .75 });
+  const matBlack  = P({ color: 0x222326, roughness: .3, clearcoat: .9, clearcoatRoughness: .12, envMapIntensity: .7 });
+  const matFrame  = P({ color: 0x141518, roughness: .45, clearcoat: .3, clearcoatRoughness: .3, envMapIntensity: .12 });
+  const matSilver = P({ color: 0xc4c7cc, metalness: 1, roughness: .3, envMapIntensity: .75 });
+  const slitOnWhite = P({ color: 0x3a3b3f, roughness: .5 });
+  const slitOnBlack = P({ color: 0x5a5c61, roughness: .4 });
+  // squares: soft off-white and deep charcoal, slightly glossy, a little see-through so the
+  // upside-down copy of the pieces underneath shows as a faint reflection
+  const matSqW = P({ color: 0xd8d8d6, roughness: .32, clearcoat: .5, clearcoatRoughness: .18, envMapIntensity: .45,
+                     transparent: true, opacity: .93 });
+  const matSqB = P({ color: 0x1e1f22, roughness: .24, clearcoat: 1, clearcoatRoughness: .08, envMapIntensity: .6,
+                     transparent: true, opacity: .84 });
 
   // ---------- pieces: smooth hourglass shapes (a side profile spun around = lathe) ----------
   const V = (r, y) => new THREE.Vector2(r, y);
   function lathe(points, segs) {
     const smooth = new THREE.SplineCurve(points).getPoints(segs || 80);
-    const geo = new THREE.LatheGeometry(smooth, 64); geo.computeVertexNormals(); return geo;
+    const geo = new THREE.LatheGeometry(smooth, 56); geo.computeVertexNormals(); return geo;
   }
-  // hourglass body: wide foot, thin waist, flared collar at height h
   const hourglass = (h, foot, waist, collar) => lathe([
     V(0, 0), V(foot, 0), V(foot, .03), V(foot * .86, .07), V(waist * 1.25, h * .32), V(waist, h * .55),
     V(collar * .85, h * .9), V(collar, h - .015), V(collar * .9, h), V(0, h + .005)]);
-  const sphere = (r, y) => new THREE.SphereGeometry(r, 40, 24).translate(0, y, 0);
+  const sphere = (r, y) => new THREE.SphereGeometry(r, 36, 22).translate(0, y, 0);
 
   const geos = {};
-  // pawn: small hourglass + ball
-  geos.p = [[hourglass(.4, .3, .085, .17), sphere(.13, .5)], []];
-  // rook: hourglass + drum with a notched top (4 small blocks)
-  {
+  geos.p = [[hourglass(.4, .3, .085, .17), sphere(.13, .5)], []];                       // pawn: hourglass + ball
+  {                                                                                      // rook: notched top
     const parts = [hourglass(.48, .33, .11, .22), new THREE.CylinderGeometry(.21, .22, .2, 48).translate(0, .58, 0)];
     for (let i = 0; i < 4; i++) {
       const a = i * Math.PI / 2 + Math.PI / 4;
@@ -176,48 +171,42 @@ function init() {
     }
     geos.r = [parts, []];
   }
-  // bishop: hourglass + egg-shaped top with a slanted slit + tiny ball
-  geos.b = [[hourglass(.56, .32, .09, .17),
-             lathe([V(0, .53), V(.11, .56), V(.15, .66), V(.13, .78), V(.06, .87), V(0, .885)], 40),
-             sphere(.04, .92)],
-            [new THREE.BoxGeometry(.025, .2, .3).rotateX(.62).translate(0, .73, 0)]];   // slit
-  // knight: hourglass + one smooth curved arc as an abstract head, facing the other side
-  {
+  geos.b = [[hourglass(.56, .32, .09, .17),                                              // bishop: egg top + slit
+             lathe([V(0, .53), V(.11, .56), V(.15, .66), V(.13, .78), V(.06, .87), V(0, .885)], 40), sphere(.04, .92)],
+            [new THREE.BoxGeometry(.025, .2, .3).rotateX(.62).translate(0, .73, 0)]];
+  {                                                                                      // knight: one curved arc
     const R = .17, tube = .085, A = Math.PI * .95;
-    const arc = new THREE.TorusGeometry(R, tube, 24, 48, A).translate(-R, .5, 0);   // starts at (0,.5), arches toward -x
+    const arc = new THREE.TorusGeometry(R, tube, 24, 48, A).translate(-R, .5, 0);
     const endX = -R + R * Math.cos(A), endY = .5 + R * Math.sin(A);
     geos.n = [[hourglass(.5, .33, .1, .17), arc, sphere(tube, .5), sphere(tube, endY).translate(endX, 0, 0)], []];
   }
-  // queen: taller hourglass + small crown ring + ball
-  geos.q = [[hourglass(.78, .35, .1, .19),
+  geos.q = [[hourglass(.78, .35, .1, .19),                                               // queen: crown ring + ball
              lathe([V(0, .77), V(.15, .79), V(.11, .86), V(.07, .9), V(0, .91)], 30),
-             new THREE.TorusGeometry(.105, .022, 16, 48).rotateX(Math.PI / 2).translate(0, .93, 0),
-             sphere(.06, 1.0)], []];
-  // king: tallest hourglass + flat cap + small cross
-  geos.k = [[hourglass(.88, .36, .105, .2),
+             new THREE.TorusGeometry(.105, .022, 16, 48).rotateX(Math.PI / 2).translate(0, .93, 0), sphere(.06, 1.0)], []];
+  geos.k = [[hourglass(.88, .36, .105, .2),                                              // king: cap + small cross
              lathe([V(0, .87), V(.16, .89), V(.13, .97), V(0, .99)], 30),
              new THREE.BoxGeometry(.05, .22, .05).translate(0, 1.09, 0),
              new THREE.BoxGeometry(.16, .05, .05).translate(0, 1.11, 0)], []];
 
-  // reflection materials: same look, but only drawn where the board top was drawn (stencil = 1)
-  const reflCache = new Map();
-  function reflMat(m) {
-    if (!reflCache.has(m)) {
+  // stencil = a marker per screen pixel. The board top writes 1 there.
+  // "inside" copies are drawn only where it is 1 (seen through the board), "outside" copies only where it is not.
+  const stencilCache = new Map();
+  function stencilMat(m, inside) {
+    const k = m.uuid + inside;
+    if (!stencilCache.has(k)) {
       const r = m.clone();
-      Object.assign(r, { stencilWrite: true, stencilRef: 1, stencilFunc: THREE.EqualStencilFunc,
+      Object.assign(r, { stencilWrite: true, stencilRef: 1, stencilFunc: inside ? THREE.EqualStencilFunc : THREE.NotEqualStencilFunc,
                          stencilFail: THREE.KeepStencilOp, stencilZFail: THREE.KeepStencilOp, stencilZPass: THREE.KeepStencilOp });
-      reflCache.set(m, r);
+      stencilCache.set(k, r);
     }
-    return reflCache.get(m);
+    return stencilCache.get(k);
   }
-  // one chess piece. mirror=true -> upside-down copy used as the reflection (drawn only inside the board)
   function piece(type, white, x, z, mirror) {
     const grp = new THREE.Group();
     const [body, accents] = geos[type];
-    const bodyMat = white ? matWhite : matBlack;
-    const accMat = white ? slitOnWhite : slitOnBlack;
-    body.forEach(geo => grp.add(new THREE.Mesh(geo, mirror ? reflMat(bodyMat) : bodyMat)));
-    accents.forEach(geo => grp.add(new THREE.Mesh(geo, mirror ? reflMat(accMat) : accMat)));
+    const bodyMat = white ? matWhite : matBlack, accMat = white ? slitOnWhite : slitOnBlack;
+    body.forEach(geo => grp.add(new THREE.Mesh(geo, mirror ? stencilMat(bodyMat, true) : bodyMat)));
+    accents.forEach(geo => grp.add(new THREE.Mesh(geo, mirror ? stencilMat(accMat, true) : accMat)));
     grp.traverse(o => { if (!o.isMesh) return;
                         if (mirror) o.renderOrder = -1; else { o.castShadow = true; o.receiveShadow = true; } });
     grp.position.set(x, 0, z);
@@ -229,52 +218,75 @@ function init() {
   // ---------- board ----------
   const turn = new THREE.Group(); scene.add(turn);          // everything that turns on click
 
-  // 1) invisible "mask" of the playing area: marks the screen pixels where the board top is (stencil = 1)
+  // 1) invisible mask of the playing area (writes stencil = 1)
   const mask = new THREE.Mesh(new THREE.PlaneGeometry(8, 8).rotateX(-Math.PI / 2),
     new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false, stencilWrite: true, stencilRef: 1,
       stencilFunc: THREE.AlwaysStencilFunc, stencilZPass: THREE.ReplaceStencilOp }));
   mask.renderOrder = -2; turn.add(mask);
 
-  // 2) 64 squares, flat, slightly see-through
+  // 2) 64 squares as two "instanced" meshes (32 light + 32 dark): far fewer draw calls -> smoother
   const sqGeo = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
+  const light = new THREE.InstancedMesh(sqGeo, matSqW, 32), dark = new THREE.InstancedMesh(sqGeo, matSqB, 32);
+  const mtx = new THREE.Matrix4(); let li = 0, di = 0;
   for (let f = 0; f < 8; f++) for (let r = 0; r < 8; r++) {
-    const m = new THREE.Mesh(sqGeo, (f + r) % 2 ? matSqW : matSqB);
-    m.position.set(f - 3.5, 0, r - 3.5); turn.add(m);
+    mtx.makeTranslation(f - 3.5, 0, r - 3.5);
+    if ((f + r) % 2) light.setMatrixAt(li++, mtx); else dark.setMatrixAt(di++, mtx);
   }
-  // soft shadows of the pieces: a see-through layer that only shows shadows
-  const shadowLayer = new THREE.Mesh(new THREE.PlaneGeometry(8, 8).rotateX(-Math.PI / 2),
-    new THREE.ShadowMaterial({ opacity: .32, depthWrite: false }));
-  shadowLayer.position.y = .002; shadowLayer.receiveShadow = true; shadowLayer.renderOrder = 1; turn.add(shadowLayer);
+  [light, dark].forEach(m => { m.receiveShadow = true; turn.add(m); });
 
-  // 3) black glossy frame (a square ring) + thin silver lines on the outer edge and around the squares
-  function ring(outer, inner, h, mat, top) {
+  // 3) dark frame + thin silver edges
+  function ring(outer, inner, h, top) {
     const sh = new THREE.Shape(); sh.moveTo(-outer, -outer); sh.lineTo(outer, -outer); sh.lineTo(outer, outer); sh.lineTo(-outer, outer); sh.closePath();
     const hole = new THREE.Path(); hole.moveTo(-inner, -inner); hole.lineTo(-inner, inner); hole.lineTo(inner, inner); hole.lineTo(inner, -inner); hole.closePath();
     sh.holes.push(hole);
     const geo = new THREE.ExtrudeGeometry(sh, { depth: h, bevelEnabled: true, bevelThickness: .012, bevelSize: .012, bevelSegments: 3 });
-    geo.rotateX(-Math.PI / 2); geo.translate(0, top - h, 0);
-    const m = new THREE.Mesh(geo, mat); m.receiveShadow = true; return m;
+    geo.rotateX(-Math.PI / 2); geo.translate(0, top - h, 0); return geo;
   }
-  turn.add(ring(4.62, 4.04, .42, matFrame, .035));     // black frame (its sides are the board's thickness)
-  turn.add(ring(4.69, 4.635, .44, matSilver, .045));   // thin silver outer edge
-  turn.add(ring(4.04, 4.0, .05, matSilver, .02));      // thin silver line around the squares
+  const frameParts = [[ring(4.69, 4.04, .42, .035), matFrame],      // dark frame; its sides are the board's thickness
+                      [ring(4.69, 4.64, .02, .05), matSilver],      // thin silver line on the outer top edge only
+                      [ring(4.04, 4.0, .05, .02), matSilver]];      // thin silver line around the squares
+  frameParts.forEach(([geo, mat]) => { const m = new THREE.Mesh(geo, mat); m.castShadow = true; m.receiveShadow = true; turn.add(m); });
 
-  // 4) pieces + their mirror copies (the reflection)
+  // 4) pieces + their upside-down copies (the faint reflection seen through the glossy squares)
   const back = ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'];
-  const refl = new THREE.Group(); refl.scale.y = -1; turn.add(refl);
+  const inBoard = new THREE.Group(); inBoard.scale.y = -1; turn.add(inBoard);
   for (let f = 0; f < 8; f++) {
     const x = f - 3.5;
     [[back[f], true, 3.5], ['p', true, 2.5], [back[f], false, -3.5], ['p', false, -2.5]].forEach(([t, w, z]) => {
       turn.add(piece(t, w, x, z, false));
-      refl.add(piece(t, w, x, z, true));
+      inBoard.add(piece(t, w, x, z, true));
     });
   }
 
-  // 5) dark floor (not drawn over the board area, so it never hides the reflection)
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(200, 200).rotateX(-Math.PI / 2),
-    new THREE.MeshBasicMaterial({ color: C(0x0e0f12), toneMapped: false, stencilWrite: true, stencilRef: 1,
-      stencilFunc: THREE.NotEqualStencilFunc, stencilZPass: THREE.KeepStencilOp }));
-  floor.position.y = -.39; scene.add(floor);
+  // 5) dark glossy floor: an upside-down copy of the board under a dark see-through floor,
+  //    which gets more solid further away -> a soft reflection that fades out
+  const FLOOR = -.4;
+  const onFloor = new THREE.Group(); onFloor.scale.y = -1; onFloor.position.y = 2 * FLOOR; turn.add(onFloor);
+  frameParts.forEach(([geo, mat]) => onFloor.add(new THREE.Mesh(geo, stencilMat(mat, false))));
+  for (let f = 0; f < 8; f++) {            // the front and side pieces also show in the floor when the board turns
+    const x = f - 3.5;
+    [[back[f], true, 3.5], ['p', true, 2.5], [back[f], false, -3.5], ['p', false, -2.5]].forEach(([t, w, z]) => {
+      const p = piece(t, w, x, z, false);
+      p.traverse(o => { if (o.isMesh) { o.material = stencilMat(o.material, false); o.castShadow = o.receiveShadow = false; } });
+      onFloor.add(p);
+    });
+  }
+  const fc = document.createElement('canvas'); fc.width = fc.height = 512;
+  const fg = fc.getContext('2d');
+  const frg = fg.createRadialGradient(256, 256, 0, 256, 256, 256);
+  frg.addColorStop(0, 'rgba(14,15,18,.8)'); frg.addColorStop(.3, 'rgba(14,15,18,.86)');
+  frg.addColorStop(.5, 'rgba(14,15,18,.96)'); frg.addColorStop(.8, 'rgba(14,15,18,1)');
+  fg.fillStyle = frg; fg.fillRect(0, 0, 512, 512);
+  const floorTex = new THREE.CanvasTexture(fc); floorTex.encoding = THREE.sRGBEncoding;
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(36, 36).rotateX(-Math.PI / 2),
+    new THREE.MeshBasicMaterial({ map: floorTex, transparent: true, depthWrite: false, toneMapped: false,
+      stencilWrite: true, stencilRef: 1, stencilFunc: THREE.NotEqualStencilFunc }));
+  floor.position.y = FLOOR; floor.renderOrder = 2; scene.add(floor);
+  // soft shadow of the board on the floor
+  const floorShadow = new THREE.Mesh(new THREE.PlaneGeometry(36, 36).rotateX(-Math.PI / 2),
+    new THREE.ShadowMaterial({ opacity: .35, depthWrite: false, stencilWrite: true, stencilRef: 1,
+      stencilFunc: THREE.NotEqualStencilFunc }));
+  floorShadow.position.y = FLOOR + .002; floorShadow.receiveShadow = true; floorShadow.renderOrder = 3; scene.add(floorShadow);
 
   // camera: in front of White, a little to the left, fairly low angle
   const camera = new THREE.PerspectiveCamera(27, 1, .1, 120);
@@ -289,6 +301,16 @@ function init() {
   }
   new ResizeObserver(resize).observe(stage); resize();
 
+  // GET STARTED sits on the empty middle of the board (between ranks 4 and 5): each frame we find
+  // where the board centre is on the screen and move the button there
+  const cta = document.getElementById('cta');
+  const centre = new THREE.Vector3();
+  function placeButton() {
+    centre.set(0, 0, 0); turn.localToWorld(centre); centre.project(camera);
+    cta.style.left = ((centre.x + 1) / 2 * stage.clientWidth) + 'px';
+    cta.style.top = ((1 - centre.y) / 2 * stage.clientHeight) + 'px';
+  }
+
   // animation: very slow idle sway; on click the board turns, then the PREDICT page opens
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const clock = new THREE.Clock();
@@ -296,12 +318,13 @@ function init() {
   const ease = (t) => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   function start() {
     if (spin) return;
-    document.getElementById('cta').classList.add('gone');
+    cta.classList.add('gone');
     spin = { t0: clock.getElapsedTime(), from: turn.rotation.y, dur: reduce ? .2 : 1.3 };
   }
   stage.addEventListener('click', start);
-  document.getElementById('cta').addEventListener('click', (e) => { e.stopPropagation(); start(); });
+  cta.addEventListener('click', (e) => { e.stopPropagation(); start(); });
 
+  window.__frames = 0;                      // counted for the smoothness check
   (function loop() {
     const t = clock.getElapsedTime();
     if (spin) {
@@ -312,6 +335,8 @@ function init() {
       turn.rotation.y = Math.sin(t * .22) * .06;
     }
     renderer.render(scene, camera);
+    if (!spin) placeButton();
+    window.__frames++;
     requestAnimationFrame(loop);
   })();
 }
