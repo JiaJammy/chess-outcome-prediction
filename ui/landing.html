@@ -137,8 +137,10 @@ function init() {
   // materials (colours written as normal screen colours, converted for three.js)
   const C = (hex) => new THREE.Color(hex).convertSRGBToLinear();
   const P = (o) => { o.color = C(o.color); return new THREE.MeshPhysicalMaterial(o); };
-  const matWhite  = P({ color: 0xe4e4e2, roughness: .38, clearcoat: .5, clearcoatRoughness: .25, envMapIntensity: .75 });
-  const matBlack  = P({ color: 0x222326, roughness: .3, clearcoat: .9, clearcoatRoughness: .12, envMapIntensity: .7 });
+  // pieces get their own, lower environment light so the key light's shading shows (lit side vs. darker side)
+  // (base colour a little below #cfcfcc, because the key light brightens it: the lit side then shows about #cfcfcc on screen)
+  const matWhite  = P({ color: 0xa9a9a6, roughness: .35, clearcoat: .3, clearcoatRoughness: .25, envMapIntensity: .3, emissive: 0x000000 });
+  const matBlack  = P({ color: 0x0e0f11, roughness: .2, clearcoat: 1, clearcoatRoughness: .06, envMapIntensity: .6, emissive: 0x000000 });
   const matFrame  = P({ color: 0x141518, roughness: .45, clearcoat: .3, clearcoatRoughness: .3, envMapIntensity: .12 });
   const matSilver = P({ color: 0xc4c7cc, metalness: 1, roughness: .3, envMapIntensity: .75 });
   const slitOnWhite = P({ color: 0x3a3b3f, roughness: .5 });
