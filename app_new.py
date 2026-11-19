@@ -213,6 +213,15 @@ def one_game(df, ok):
                 f'moves after the cutoff.</p></div>')
 
 
+# one short line per style group, written from results/clustering_profiles.csv:
+# Developer = most legal moves (38.0) and many pieces out, castles least often (38% of games) after Tactical;
+# Early castler = castles in 75% of games and earliest (ply 15.6), fewest captures (1.37);
+# Tactical = most captures (2.05) and biggest material swings (4.36), fewest pieces developed (2.74).
+STYLE_ONE_LINE = {"Developer": "Gets the pieces out fast and keeps many moves open.",
+                  "Early castler": "Castles early and keeps the opening quiet.",
+                  "Tactical": "Trades early, with big swings in material."}
+
+
 def style_groups(text):
     style = get_style_model()
     if style is None:
@@ -230,7 +239,8 @@ def style_groups(text):
         return
     cards = "".join(f'<div class="card"><div class="name">{esc(name)}</div>'
                     f'<div class="tag">{int(r["n_games"])} games</div><div class="grp">{esc(r["group_name"])}</div>'
-                    f'<p>{esc(r["group_meaning"])}</p></div>' for name, r in sty.iterrows())
+                    f'<p class="one">{esc(STYLE_ONE_LINE.get(r["group_name"], ""))}</p>'
+                    f'<p class="full">{esc(r["group_meaning"])}</p></div>' for name, r in sty.iterrows())
     st.html(f'<div class="players">{cards}</div>')
     who = st.selectbox("Pick a player to compare their numbers with their group and with all players",
                        sty.index.tolist())
