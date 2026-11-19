@@ -195,7 +195,7 @@ table.cmp td.ours { background: var(--paper); color: var(--paper-ink) !important
 }
 
 /* ---------- home page sections below the board ---------- */
-.st-key-split { margin-top: 40px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.st-key-split { margin-top: 80px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .st-key-split [data-testid="stHorizontalBlock"] { gap: 0 !important; }
 .st-key-split [data-testid="stColumn"]:first-child { background: var(--paper); }
 .st-key-split iframe { display: block; }
@@ -235,4 +235,8 @@ table.cmp td.ours { background: var(--paper); color: var(--paper-ink) !important
 .st-key-ready_buttons { margin: 22px 0 10px; }
 
 /* landing page: the 3D board fills the screen */
-.st-key-landing iframe { height: calc(100vh - 78px) !important; min-height: 600px; }
+/* a fixed-height block in normal page flow; Streamlit's flex layout would otherwise keep it at 720px */
+[data-testid="stLayoutWrapper"]:has(> .st-key-landing), .st-key-landing {
+  position: relative; flex: 0 0 auto !important; height: max(600px, calc(100vh - 78px)) !important; overflow: hidden; }
+.st-key-landing [data-testid="stElementContainer"] { flex: 1 1 auto !important; height: 100% !important; }
+.st-key-landing iframe { height: 100% !important; }
