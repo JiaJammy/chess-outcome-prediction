@@ -25,9 +25,10 @@
   .cta { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 3;
     font-family: 'Josefin Sans', Arial, sans-serif; font-weight: 400; letter-spacing: .5em; font-size: 14px;
     padding: 13px 22px 11px 30px; border: 1px solid #ffffff; color: #ffffff; white-space: nowrap;
-    background: rgba(14,15,18,.55); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+    text-shadow: 0 0 10px rgba(255,255,255,.45); box-shadow: 0 0 18px rgba(255,255,255,.12);
+    background: rgba(14,15,18,.72); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
     cursor: pointer; animation: pulse 2.5s ease-in-out infinite; transition: opacity .4s; }
-  @keyframes pulse { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+  @keyframes pulse { 0%, 100% { opacity: .4; } 50% { opacity: 1; } }
   .cta.gone { animation: none; opacity: 0; }
   .fallback { display: none; position: absolute; inset: 0; z-index: 2; align-items: center; justify-content: center; flex-direction: column; gap: 30px; }
   .fallback svg { width: min(56vh, 70vw); transform: perspective(900px) rotateX(48deg) rotateZ(-24deg); }
@@ -50,6 +51,9 @@
   </div>
 </div>
 
+<script>
+{{PIECES_JS}}
+</script>
 <script>
 // ---------- open the PREDICT page ----------
 function goPredict() {
@@ -137,14 +141,9 @@ function init() {
   // materials (colours written as normal screen colours, converted for three.js)
   const C = (hex) => new THREE.Color(hex).convertSRGBToLinear();
   const P = (o) => { o.color = C(o.color); return new THREE.MeshPhysicalMaterial(o); };
-  // pieces get their own, lower environment light so the key light's shading shows (lit side vs. darker side)
-  // (base colour a little below #cfcfcc, because the key light brightens it: the lit side then shows about #cfcfcc on screen)
-  const matWhite  = P({ color: 0xa9a9a6, roughness: .35, clearcoat: .3, clearcoatRoughness: .25, envMapIntensity: .3, emissive: 0x000000 });
-  const matBlack  = P({ color: 0x0e0f11, roughness: .2, clearcoat: 1, clearcoatRoughness: .06, envMapIntensity: .6, emissive: 0x000000 });
+  const { matWhite, matBlack, slitOnWhite, slitOnBlack, geos } = pieceKit();   // ui/pieces.js
   const matFrame  = P({ color: 0x141518, roughness: .45, clearcoat: .3, clearcoatRoughness: .3, envMapIntensity: .12 });
   const matSilver = P({ color: 0xc4c7cc, metalness: 1, roughness: .3, envMapIntensity: .75 });
-  const slitOnWhite = P({ color: 0x3a3b3f, roughness: .5 });
-  const slitOnBlack = P({ color: 0x5a5c61, roughness: .4 });
   // squares: soft off-white and deep charcoal, slightly glossy, a little see-through so the
   // upside-down copy of the pieces underneath shows as a faint reflection
   const matSqW = P({ color: 0xd8d8d6, roughness: .32, clearcoat: .5, clearcoatRoughness: .18, envMapIntensity: .45,
@@ -152,43 +151,6 @@ function init() {
   const matSqB = P({ color: 0x1e1f22, roughness: .24, clearcoat: 1, clearcoatRoughness: .08, envMapIntensity: .6,
                      transparent: true, opacity: .84 });
 
-  // ---------- pieces: smooth hourglass shapes (a side profile spun around = lathe) ----------
-  const V = (r, y) => new THREE.Vector2(r, y);
-  function lathe(points, segs) {
-    const smooth = new THREE.SplineCurve(points).getPoints(segs || 80);
-    const geo = new THREE.LatheGeometry(smooth, 56); geo.computeVertexNormals(); return geo;
-  }
-  const hourglass = (h, foot, waist, collar) => lathe([
-    V(0, 0), V(foot, 0), V(foot, .03), V(foot * .86, .07), V(waist * 1.25, h * .32), V(waist, h * .55),
-    V(collar * .85, h * .9), V(collar, h - .015), V(collar * .9, h), V(0, h + .005)]);
-  const sphere = (r, y) => new THREE.SphereGeometry(r, 36, 22).translate(0, y, 0);
-
-  const geos = {};
-  geos.p = [[hourglass(.4, .3, .085, .17), sphere(.13, .5)], []];                       // pawn: hourglass + ball
-  {                                                                                      // rook: notched top
-    const parts = [hourglass(.48, .33, .11, .22), new THREE.CylinderGeometry(.21, .22, .2, 48).translate(0, .58, 0)];
-    for (let i = 0; i < 4; i++) {
-      const a = i * Math.PI / 2 + Math.PI / 4;
-      parts.push(new THREE.BoxGeometry(.11, .08, .11).rotateY(-a).translate(.145 * Math.cos(a), .72, .145 * Math.sin(a)));
-    }
-    geos.r = [parts, []];
-  }
-  geos.b = [[hourglass(.56, .32, .09, .17),                                              // bishop: egg top + slit
-             lathe([V(0, .53), V(.11, .56), V(.15, .66), V(.13, .78), V(.06, .87), V(0, .885)], 40), sphere(.04, .92)],
-            [new THREE.BoxGeometry(.025, .2, .3).rotateX(.62).translate(0, .73, 0)]];
-  {                                                                                      // knight: one curved arc
-    const R = .17, tube = .085, A = Math.PI * .95;
-    const arc = new THREE.TorusGeometry(R, tube, 24, 48, A).translate(-R, .5, 0);
-    const endX = -R + R * Math.cos(A), endY = .5 + R * Math.sin(A);
-    geos.n = [[hourglass(.5, .33, .1, .17), arc, sphere(tube, .5), sphere(tube, endY).translate(endX, 0, 0)], []];
-  }
-  geos.q = [[hourglass(.78, .35, .1, .19),                                               // queen: crown ring + ball
-             lathe([V(0, .77), V(.15, .79), V(.11, .86), V(.07, .9), V(0, .91)], 30),
-             new THREE.TorusGeometry(.105, .022, 16, 48).rotateX(Math.PI / 2).translate(0, .93, 0), sphere(.06, 1.0)], []];
-  geos.k = [[hourglass(.88, .36, .105, .2),                                              // king: cap + small cross
-             lathe([V(0, .87), V(.16, .89), V(.13, .97), V(0, .99)], 30),
-             new THREE.BoxGeometry(.05, .22, .05).translate(0, 1.09, 0),
-             new THREE.BoxGeometry(.16, .05, .05).translate(0, 1.11, 0)], []];
 
   // stencil = a marker per screen pixel. The board top writes 1 there.
   // "inside" copies are drawn only where it is 1 (seen through the board), "outside" copies only where it is not.
@@ -326,8 +288,14 @@ function init() {
   stage.addEventListener('click', start);
   cta.addEventListener('click', (e) => { e.stopPropagation(); start(); });
 
+  // when the board is scrolled out of view, stop drawing it (saves the laptop's graphics chip -> smooth scrolling)
+  let onScreen = true;
+  new IntersectionObserver((e) => { onScreen = e[0].isIntersecting; }).observe(stage);
+
   window.__frames = 0;                      // counted for the smoothness check
   (function loop() {
+    requestAnimationFrame(loop);
+    if (!onScreen && !spin) return;
     const t = clock.getElapsedTime();
     if (spin) {
       const p = Math.min(1, (t - spin.t0) / spin.dur);
@@ -339,7 +307,6 @@ function init() {
     renderer.render(scene, camera);
     if (!spin) placeButton();
     window.__frames++;
-    requestAnimationFrame(loop);
   })();
 }
 </script>

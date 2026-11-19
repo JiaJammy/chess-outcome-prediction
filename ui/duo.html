@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<!-- Close-up of OUR king and queen (same shapes and materials as the board: ui/pieces.js) on a light-grey
+     background. Drawn once (and again when the size changes) - no animation, so it costs nothing while scrolling. -->
+<style>
+  html, body { margin: 0; height: 100%; background: #ececec; overflow: hidden; }
+  #stage { position: absolute; inset: 0; }
+  canvas { display: block; }
+  .fallback { display: none; position: absolute; inset: 0; align-items: center; justify-content: center; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div class="fallback" id="fallback">{{LOGO_DARK}}</div>
+<script>
+{{PIECES_JS}}
+</script>
+<script>
+function showFallback() { document.getElementById('fallback').style.display = 'flex'; }
+function loadScript(src) {
+  return new Promise((ok, fail) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = fail; document.head.appendChild(s); });
+}
+let ok3d = false;
+try { const c = document.createElement('canvas'); ok3d = !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) {}
+if (!ok3d) showFallback();
+else loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js')
+  .then(() => loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js').catch(() => {}))
+  .then(() => { try { init(); } catch (e) { console.error(e); showFallback(); } })
+  .catch(showFallback);
+
+function init() {
+  const stage = document.getElementById('stage');
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setClearColor(0xececec, 1);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;     // same look as the board
+  renderer.toneMappingExposure = 0.8;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  stage.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  if (THREE.RoomEnvironment) scene.environment = pmrem.fromScene(new THREE.RoomEnvironment(), 0.04).texture;
+
+  // same lights as the board: soft key light from the upper left, weak fill, a little ambient
+  const key = new THREE.DirectionalLight(0xffffff, 1.1);
+  key.position.set(-4, 7, 4); key.castShadow = true;
+  key.shadow.mapSize.set(1024, 1024);
+  Object.assign(key.shadow.camera, { left: -2, right: 2, top: 2, bottom: -2, near: 1, far: 20 });
+  key.shadow.bias = -0.0005; key.shadow.normalBias = 0.02;
+  scene.add(key);
+  const fill = new THREE.DirectionalLight(0xffffff, 0.3); fill.position.set(5, 3, 6); scene.add(fill);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.15));
+
+  const kit = pieceKit();
+  function piece(type, white) {
+    const g = new THREE.Group();
+    const [body, accents] = kit.geos[type];
+    body.forEach(geo => g.add(new THREE.Mesh(geo, white ? kit.matWhite : kit.matBlack)));
+    accents.forEach(geo => g.add(new THREE.Mesh(geo, white ? kit.slitOnWhite : kit.slitOnBlack)));
+    g.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+    return g;
+  }
+  const king = piece('k', false);  king.position.set(.3, 0, -.25);  scene.add(king);   // black king behind
+  const queen = piece('q', true);  queen.position.set(-.32, 0, .22); scene.add(queen);  // white queen in front
+
+  // the light-grey ground only shows shadows: one from the key light + a soft dark patch under each piece
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(20, 20).rotateX(-Math.PI / 2), new THREE.ShadowMaterial({ opacity: .18 }));
+  ground.receiveShadow = true; scene.add(ground);
+  const bc = document.createElement('canvas'); bc.width = bc.height = 128;
+  const bg = bc.getContext('2d'); const rg = bg.createRadialGradient(64, 64, 0, 64, 64, 64);
+  rg.addColorStop(0, 'rgba(0,0,0,.45)'); rg.addColorStop(.5, 'rgba(0,0,0,.15)'); rg.addColorStop(1, 'rgba(0,0,0,0)');
+  bg.fillStyle = rg; bg.fillRect(0, 0, 128, 128);
+  const blobTex = new THREE.CanvasTexture(bc);
+  [[king, .95], [queen, .9]].forEach(([p, s]) => {
+    const b = new THREE.Mesh(new THREE.PlaneGeometry(s, s).rotateX(-Math.PI / 2),
+      new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false, toneMapped: false }));
+    b.position.set(p.position.x, .002, p.position.z); scene.add(b);
+  });
+
+  const camera = new THREE.PerspectiveCamera(26, 1, .1, 50);
+  function draw() {
+    const w = stage.clientWidth, h = stage.clientHeight;
+    renderer.setSize(w, h);
+    camera.aspect = w / h;
+    const k = Math.max(1, .9 / camera.aspect);              // step back if the box is tall and narrow
+    camera.position.set(1.0 * k, 1.2 * k, 4.4 * k); camera.lookAt(0, .5, 0);
+    camera.updateProjectionMatrix();
+    renderer.render(scene, camera);
+  }
+  new ResizeObserver(draw).observe(stage);
+}
+</script>
+</body>
+</html>

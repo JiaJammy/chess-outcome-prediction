@@ -21,7 +21,8 @@ import chess.svg
 
 from src.predict import (load_models, read_games, game_info, predict_all, stockfish_engine, MAX_GAMES, CUTOFFS)
 from src.style import style_for_games, STYLE_LABELS
-from src.ui_parts import (esc, logo_svg, logo_img, pct, section_title, note_box, chart_cutoff, chart_confidence, legend)
+from src.ui_parts import (esc, logo_svg, logo_img, piece_icon, pct, section_title, note_box, chart_cutoff,
+                          chart_confidence, legend)
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 st.set_page_config(page_title="Predict the Winner", page_icon="♛", layout="wide", initial_sidebar_state="collapsed")
@@ -116,8 +117,55 @@ def site_foot():
 # PAGE 1 - HOME (3D board)
 # =====================================================================
 def page_home():
+    pieces_js = read_text("ui", "pieces.js")          # the 3D pieces, shared by both 3D pictures
     with st.container(key="landing"):
-        st.iframe(read_text("ui", "landing.html").replace("{{LOGO}}", logo_svg(78, width_px=1.4)), height=720)
+        st.iframe(read_text("ui", "landing.html").replace("{{LOGO}}", logo_svg(78, width_px=1.4))
+                  .replace("{{PIECES_JS}}", pieces_js), height=720)
+
+    # ---- 1) split section: our 3D king and queen on light grey | what the app does ----
+    with st.container(key="split"):
+        left, right = st.columns(2, gap=None)
+        with left:
+            st.iframe(read_text("ui", "duo.html").replace("{{PIECES_JS}}", pieces_js)
+                      .replace("{{LOGO_DARK}}", logo_svg(160, stroke="#16171b")), height=740)
+        with right:
+            details = ["623,722 real Lichess blitz games", "Only the first 10-30 moves are used",
+                       "Stockfish evaluation of the position", "3 player styles found by clustering",
+                       "Free and open source"]
+            st.html('<div class="split-text"><h2>See the end from the opening.</h2>'
+                    '<p>Upload any chess game. The app looks only at the opening - the first 10 to 30 moves - and '
+                    'gives the chance that White wins, Black wins, or the game is drawn.</p>'
+                    '<p>For players with five or more games in the file, it also names their playing style.</p>'
+                    '<h3>The details</h3><ul>' + "".join(f"<li>{esc(d)}</li>" for d in details) + '</ul></div>')
+
+    # ---- 2) numbers strip (all read from results/ and the saved model) ----
+    tr = get_models()[(10, True)]["test_result"]
+    conf = results_csv("confidence_bands.csv").set_index("model_at_least_sure")
+    cut = results_csv("models_by_cutoff.csv").set_index("cutoff_move")
+    n_styles = int(results_csv("clustering_profiles.csv")["name"].notna().sum())
+    nums = [(pct(tr["test_acc"]), "Accuracy at move 10", f"test · always White {pct(tr['test_acc_always_white'])}"),
+            (pct(conf.loc[">= 80%", "test_acc"]), "When the model is sure",
+             f"at least 80% sure ({conf.loc['>= 80%', 'share_of_test']:.0%} of test games) · "
+             f"always White {pct(conf.loc['>= 80%', 'test_acc_always_white_same_games'])}"),
+            (pct(cut.loc[30, "cv_acc_mean"]), "By move 30", f"train CV · always White {pct(cut.loc[30, 'cv_always_white'])}"),
+            (str(n_styles), "Playing styles", "K-Means clustering")]
+    st.html('<div class="numbers">' + "".join(
+        f'<div><div class="n">{n}</div><div class="l">{esc(l)}</div><div class="s">{esc(sub)}</div></div>'
+        for n, l, sub in nums) + '</div>')
+
+    # ---- 3) how it works: four steps with line-art pieces ----
+    steps = [("pawn", "Upload your games"), ("knight", "We read the first moves"),
+             ("bishop", "Stockfish and our model judge the position"), ("king", "See who is likely to win")]
+    st.html('<div class="home-how"><h2>How it works</h2><div class="how-cards">' + "".join(
+        f'<div class="how-card">{piece_icon(kind, 70)}<div class="no">0{i + 1}</div><p>{esc(t)}</p></div>'
+        for i, (kind, t) in enumerate(steps)) + '</div></div>')
+
+    # ---- 4) ready to play? ----
+    st.html('<div class="ready"><h2>Ready to play?</h2><span class="rule"></span></div>')
+    with st.container(key="ready_buttons", horizontal=True, horizontal_alignment="center", gap="medium"):
+        st.button("Predict a game", key="home_predict", on_click=go, args=("predict",))
+        st.button("How it works", key="home_model", on_click=go, args=("model",))
+    site_foot()
 
 
 # =====================================================================

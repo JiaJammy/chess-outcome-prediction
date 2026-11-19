@@ -36,6 +36,28 @@ def logo_svg(height=40, stroke=INK, width_px=1.3):
             f'{piece(QUEEN, 40, 0.9, ball=True)}{piece(KING, 78, 1.0)}</g></svg>')
 
 
+# more pieces in the same line-art style (same base as the king and queen above)
+PAWN = ("M-16 95H16V90H-16Z M-13 90C-13 86 -10 84 -8 83H8C10 84 13 86 13 90 "
+        "M-7 83C-4 74 -4 66 -5 60 M7 83C4 74 4 66 5 60 M-9 60H9L7 56.5H-7Z")
+BISHOP = (_BASE + "M-7 42.5C-14 34 -10 20 0 12C10 20 14 34 7 42.5 M3 22L-4 32")
+KNIGHT = ("M-20 95H20V90H-20Z M-17 90C-17 86 -14 83.5 -11 82.5H11C14 83.5 17 86 17 90 "
+          "M-11 82.5C-11 70 -12 60 -8 50C-6 44 -10 40 -15 37C-19 35 -19 29 -15 26L-3 17C1 12 5 9 7 5"
+          "L9 12C16 17 18 28 16 40C14 54 12 68 11 82.5")
+_EXTRA = {"pawn": '<circle cx="0" cy="47" r="9.5"/>', "bishop": '<circle cx="0" cy="8.5" r="3"/>',
+          "knight": '<circle cx="-3" cy="24" r="1.4"/>', "king": "", "queen": '<circle cx="0" cy="13.5" r="3"/>'}
+_PATHS = {"pawn": PAWN, "bishop": BISHOP, "knight": KNIGHT, "king": KING, "queen": QUEEN}
+
+
+def piece_icon(kind, height=64, stroke=INK, width_px=1.3):
+    """One white line-art piece as an <img> (st.html keeps images but removes inline <svg>)."""
+    import base64
+    svg = (f'<svg viewBox="-30 2 60 96" height="{height}" xmlns="http://www.w3.org/2000/svg">'
+           f'<g fill="none" stroke="{stroke}" stroke-width="{width_px}" stroke-linejoin="round" stroke-linecap="round">'
+           f'<path d="{_PATHS[kind]}"/>{_EXTRA[kind]}</g></svg>')
+    data = base64.b64encode(svg.encode()).decode()
+    return f'<img src="data:image/svg+xml;base64,{data}" alt="{kind} icon" height="{height}">'
+
+
 def logo_img(height=34):
     """The same logo as an <img> (st.html removes inline <svg>, but keeps images)."""
     import base64
