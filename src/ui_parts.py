@@ -1,7 +1,7 @@
-"""Small HTML/SVG building blocks for the new app (app_new.py).
+"""Small HTML/SVG building blocks for the app (app.py).
 
 Everything here only makes text (HTML or SVG); there is no machine learning in this file.
-The old app (app.py) does not use this file.
+The backup app (app_classic.py) does not use this file.
 """
 import html
 

@@ -4,7 +4,7 @@
 !/.gitignore
 !/README.md
 !/app.py
-!/app_new.py
+!/app_classic.py
 !/ui/
 !/requirements.txt
 !/packages.txt
