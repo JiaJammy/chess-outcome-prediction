@@ -1,0 +1,314 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<!-- Landing page of app.py. A 3D chessboard made from scratch with three.js.
+     {{LOGO}} is replaced by the queen-and-king SVG from src/ui_parts.py. -->
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@200;300;400&family=Source+Sans+3:wght@400&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; height: 100%; background: #111216; color: #f5f5f5; overflow: hidden;
+    font-family: 'Source Sans 3', 'Segoe UI', Arial, sans-serif; }
+  .wrap { height: 100%; display: flex; flex-direction: column; align-items: center; }
+  .top { text-align: center; padding-top: 20px; position: relative; z-index: 4; }
+  .top svg { height: 74px; }
+  .title { display: flex; align-items: center; justify-content: center; gap: 22px; margin-top: 14px;
+    font-family: 'Josefin Sans', 'Montserrat', Arial, sans-serif; font-weight: 200; letter-spacing: .34em;
+    font-size: clamp(20px, 3.3vw, 40px); text-transform: uppercase; padding-left: .34em; white-space: nowrap; }
+  .title:before, .title:after { content: ""; width: clamp(26px, 8vw, 120px); height: 1px; background: rgba(245,245,245,.75); }
+  .tag { transform: translateZ(0); margin-top: 12px; font-size: 12px; font-weight: 400; letter-spacing: .42em; color: #8a8a8a;
+    text-transform: uppercase; font-family: 'Josefin Sans', Arial, sans-serif; padding-left: .42em; }
+  .stage { position: relative; flex: 1; width: 100%; min-height: 280px; cursor: pointer; }
+  .stage canvas { display: block; position: absolute; inset: 0; z-index: 0; }
+  .vignette { position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    box-shadow: inset 0 0 70px 30px #111216; }   /* edges fade into the page colour */
+  /* GET STARTED: always above the 3D scene (z-index 3). The script moves it onto the empty middle of the board. */
+  .cta { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 3;
+    font-family: 'Josefin Sans', Arial, sans-serif; font-weight: 400; letter-spacing: .5em; font-size: 14px;
+    padding: 13px 22px 11px 30px; border: 1px solid #ffffff; color: #ffffff; white-space: nowrap;
+    text-shadow: 0 0 10px rgba(255,255,255,.45); box-shadow: 0 0 18px rgba(255,255,255,.12);
+    background: rgba(14,15,18,.72); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+    cursor: pointer; animation: pulse 2.5s ease-in-out infinite; transition: opacity .4s; }
+  @keyframes pulse { 0%, 100% { opacity: .4; } 50% { opacity: 1; } }
+  .cta.gone { animation: none; opacity: 0; }
+  .fallback { display: none; position: absolute; inset: 0; z-index: 2; align-items: center; justify-content: center; flex-direction: column; gap: 30px; }
+  .fallback svg { width: min(56vh, 70vw); transform: perspective(900px) rotateX(48deg) rotateZ(-24deg); }
+  .fallback .cta { position: static; transform: none; animation: none; opacity: 1; }
+  @media (max-width: 520px) { .cta { font-size: 11px; letter-spacing: .32em; padding: 10px 12px 8px 16px; } .top svg { height: 60px; } }
+  @media (prefers-reduced-motion: reduce) { .cta { animation: none; opacity: 1; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    {{LOGO}}
+    <div class="title">Predict the winner</div>
+    <div class="tag">See the end from the opening.</div>
+  </div>
+  <div class="stage" id="stage">
+    <div class="vignette"></div>
+    <div class="cta" id="cta">GET STARTED</div>
+    <div class="fallback" id="fallback"></div>
+  </div>
+</div>
+
+<script>
+{{PIECES_JS}}
+</script>
+<script>
+// ---------- open the PREDICT page ----------
+function goPredict() {
+  try {   // click the PREDICT button of the top menu (keeps the same app session)
+    const b = window.parent.document.querySelector('.st-key-nav_predict button');
+    if (b) { b.click(); return; }
+  } catch (e) {}
+  try { window.top.location.search = '?page=predict'; } catch (e) { window.open('?page=predict', '_top'); }
+}
+
+// ---------- fallback: flat board picture + button (no 3D) ----------
+function showFallback() {
+  if (window.__fallback) return;
+  window.__fallback = true;
+  const st = document.getElementById('stage');
+  st.querySelectorAll('canvas').forEach(c => c.remove());
+  document.getElementById('cta').style.display = 'none';
+  let sq = '';
+  for (let r = 0; r < 8; r++) for (let f = 0; f < 8; f++)
+    sq += `<rect x="${10 + f * 10}" y="${10 + r * 10}" width="10" height="10" fill="${(r + f) % 2 ? '#1e1f22' : '#d8d8d6'}"/>`;
+  const fb = document.getElementById('fallback');
+  fb.innerHTML = `<svg viewBox="0 0 100 100"><rect x="2" y="2" width="96" height="96" fill="#16171a" stroke="#b9bcc2" stroke-width=".6"/>${sq}</svg>
+                  <div class="cta" onclick="goPredict()">GET STARTED</div>`;
+  fb.style.display = 'flex';
+}
+
+function hasWebGL() {
+  try { const c = document.createElement('canvas');
+        return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl'))); }
+  catch (e) { return false; }
+}
+function loadScript(src) {
+  return new Promise((ok, fail) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = fail; document.head.appendChild(s); });
+}
+
+if (!hasWebGL()) showFallback();
+else {
+  setTimeout(() => { if (!window.THREE) showFallback(); }, 9000);
+  loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js')
+    // the soft studio light (RoomEnvironment) is an official three.js extra; if it fails we use our own
+    .then(() => loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js').catch(() => {}))
+    .then(() => { try { init(); } catch (e) { console.error(e); showFallback(); } })
+    .catch(showFallback);
+}
+
+// ---------- the 3D scene ----------
+function init() {
+  const stage = document.getElementById('stage');
+  const renderer = new THREE.WebGLRenderer({ antialias: true, stencil: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+  renderer.setClearColor(0x0e0f12, 1);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;    // soft, film-like contrast
+  renderer.toneMappingExposure = 0.8;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  stage.prepend(renderer.domElement);
+
+  const scene = new THREE.Scene();
+
+  // soft studio light and reflections: a small white "room" rendered into an environment map
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  if (THREE.RoomEnvironment) {
+    scene.environment = pmrem.fromScene(new THREE.RoomEnvironment(), 0.04).texture;
+  } else {   // backup: a painted dark studio with soft light boxes
+    const ec = document.createElement('canvas'); ec.width = 1024; ec.height = 512;
+    const g = ec.getContext('2d');
+    const grad = g.createLinearGradient(0, 0, 0, 512);
+    grad.addColorStop(0, '#9a9a9a'); grad.addColorStop(.5, '#4a4a4c'); grad.addColorStop(1, '#202022');
+    g.fillStyle = grad; g.fillRect(0, 0, 1024, 512);
+    const t = new THREE.CanvasTexture(ec); t.mapping = THREE.EquirectangularReflectionMapping; t.encoding = THREE.sRGBEncoding;
+    scene.environment = pmrem.fromEquirectangular(t).texture;
+  }
+
+  // lights: one soft key light from the upper left (with soft shadows), a weak fill, a little ambient
+  const key = new THREE.DirectionalLight(0xffffff, 1.1);
+  key.position.set(-7, 11, 4); key.castShadow = true;
+  key.shadow.mapSize.set(2048, 2048);
+  Object.assign(key.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8, near: 1, far: 40 });
+  key.shadow.bias = -0.0004; key.shadow.normalBias = 0.02; key.shadow.radius = 4;
+  scene.add(key);
+  const fill = new THREE.DirectionalLight(0xffffff, 0.3); fill.position.set(7, 4, 8); scene.add(fill);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.15));
+
+  // materials (colours written as normal screen colours, converted for three.js)
+  const C = (hex) => new THREE.Color(hex).convertSRGBToLinear();
+  const P = (o) => { o.color = C(o.color); return new THREE.MeshPhysicalMaterial(o); };
+  const { matWhite, matBlack, slitOnWhite, slitOnBlack, geos } = pieceKit();   // ui/pieces.js
+  const matFrame  = P({ color: 0x141518, roughness: .45, clearcoat: .3, clearcoatRoughness: .3, envMapIntensity: .12 });
+  const matSilver = P({ color: 0xc4c7cc, metalness: 1, roughness: .3, envMapIntensity: .75 });
+  // squares: soft off-white and deep charcoal, slightly glossy, a little see-through so the
+  // upside-down copy of the pieces underneath shows as a faint reflection
+  const matSqW = P({ color: 0xd8d8d6, roughness: .32, clearcoat: .5, clearcoatRoughness: .18, envMapIntensity: .45,
+                     transparent: true, opacity: .93 });
+  const matSqB = P({ color: 0x1e1f22, roughness: .24, clearcoat: 1, clearcoatRoughness: .08, envMapIntensity: .6,
+                     transparent: true, opacity: .84 });
+
+
+  // stencil = a marker per screen pixel. The board top writes 1 there.
+  // "inside" copies are drawn only where it is 1 (seen through the board), "outside" copies only where it is not.
+  const stencilCache = new Map();
+  function stencilMat(m, inside) {
+    const k = m.uuid + inside;
+    if (!stencilCache.has(k)) {
+      const r = m.clone();
+      Object.assign(r, { stencilWrite: true, stencilRef: 1, stencilFunc: inside ? THREE.EqualStencilFunc : THREE.NotEqualStencilFunc,
+                         stencilFail: THREE.KeepStencilOp, stencilZFail: THREE.KeepStencilOp, stencilZPass: THREE.KeepStencilOp });
+      stencilCache.set(k, r);
+    }
+    return stencilCache.get(k);
+  }
+  function piece(type, white, x, z, mirror) {
+    const grp = new THREE.Group();
+    const [body, accents] = geos[type];
+    const bodyMat = white ? matWhite : matBlack, accMat = white ? slitOnWhite : slitOnBlack;
+    body.forEach(geo => grp.add(new THREE.Mesh(geo, mirror ? stencilMat(bodyMat, true) : bodyMat)));
+    accents.forEach(geo => grp.add(new THREE.Mesh(geo, mirror ? stencilMat(accMat, true) : accMat)));
+    grp.traverse(o => { if (!o.isMesh) return;
+                        if (mirror) o.renderOrder = -1; else { o.castShadow = true; o.receiveShadow = true; } });
+    grp.position.set(x, 0, z);
+    if (type === 'n') grp.rotation.y = white ? -Math.PI / 2 : Math.PI / 2;   // the head faces the other side
+    if (type === 'b') grp.rotation.y = white ? 0 : Math.PI;
+    return grp;
+  }
+
+  // ---------- board ----------
+  const turn = new THREE.Group(); scene.add(turn);          // everything that turns on click
+
+  // 1) invisible mask of the playing area (writes stencil = 1)
+  const mask = new THREE.Mesh(new THREE.PlaneGeometry(8, 8).rotateX(-Math.PI / 2),
+    new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false, stencilWrite: true, stencilRef: 1,
+      stencilFunc: THREE.AlwaysStencilFunc, stencilZPass: THREE.ReplaceStencilOp }));
+  mask.renderOrder = -2; turn.add(mask);
+
+  // 2) 64 squares as two "instanced" meshes (32 light + 32 dark): far fewer draw calls -> smoother
+  const sqGeo = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
+  const light = new THREE.InstancedMesh(sqGeo, matSqW, 32), dark = new THREE.InstancedMesh(sqGeo, matSqB, 32);
+  const mtx = new THREE.Matrix4(); let li = 0, di = 0;
+  for (let f = 0; f < 8; f++) for (let r = 0; r < 8; r++) {
+    mtx.makeTranslation(f - 3.5, 0, r - 3.5);
+    if ((f + r) % 2) light.setMatrixAt(li++, mtx); else dark.setMatrixAt(di++, mtx);
+  }
+  [light, dark].forEach(m => { m.receiveShadow = true; turn.add(m); });
+
+  // 3) dark frame + thin silver edges
+  function ring(outer, inner, h, top) {
+    const sh = new THREE.Shape(); sh.moveTo(-outer, -outer); sh.lineTo(outer, -outer); sh.lineTo(outer, outer); sh.lineTo(-outer, outer); sh.closePath();
+    const hole = new THREE.Path(); hole.moveTo(-inner, -inner); hole.lineTo(-inner, inner); hole.lineTo(inner, inner); hole.lineTo(inner, -inner); hole.closePath();
+    sh.holes.push(hole);
+    const geo = new THREE.ExtrudeGeometry(sh, { depth: h, bevelEnabled: true, bevelThickness: .012, bevelSize: .012, bevelSegments: 3 });
+    geo.rotateX(-Math.PI / 2); geo.translate(0, top - h, 0); return geo;
+  }
+  const frameParts = [[ring(4.69, 4.04, .42, .035), matFrame],      // dark frame; its sides are the board's thickness
+                      [ring(4.69, 4.64, .02, .05), matSilver],      // thin silver line on the outer top edge only
+                      [ring(4.04, 4.0, .05, .02), matSilver]];      // thin silver line around the squares
+  frameParts.forEach(([geo, mat]) => { const m = new THREE.Mesh(geo, mat); m.castShadow = true; m.receiveShadow = true; turn.add(m); });
+
+  // 4) pieces + their upside-down copies (the faint reflection seen through the glossy squares)
+  const back = ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'];
+  const inBoard = new THREE.Group(); inBoard.scale.y = -1; turn.add(inBoard);
+  for (let f = 0; f < 8; f++) {
+    const x = f - 3.5;
+    [[back[f], true, 3.5], ['p', true, 2.5], [back[f], false, -3.5], ['p', false, -2.5]].forEach(([t, w, z]) => {
+      turn.add(piece(t, w, x, z, false));
+      inBoard.add(piece(t, w, x, z, true));
+    });
+  }
+
+  // 5) dark glossy floor: an upside-down copy of the board under a dark see-through floor,
+  //    which gets more solid further away -> a soft reflection that fades out
+  const FLOOR = -.4;
+  const onFloor = new THREE.Group(); onFloor.scale.y = -1; onFloor.position.y = 2 * FLOOR; turn.add(onFloor);
+  frameParts.forEach(([geo, mat]) => onFloor.add(new THREE.Mesh(geo, stencilMat(mat, false))));
+  for (let f = 0; f < 8; f++) {            // the front and side pieces also show in the floor when the board turns
+    const x = f - 3.5;
+    [[back[f], true, 3.5], ['p', true, 2.5], [back[f], false, -3.5], ['p', false, -2.5]].forEach(([t, w, z]) => {
+      const p = piece(t, w, x, z, false);
+      p.traverse(o => { if (o.isMesh) { o.material = stencilMat(o.material, false); o.castShadow = o.receiveShadow = false; } });
+      onFloor.add(p);
+    });
+  }
+  const fc = document.createElement('canvas'); fc.width = fc.height = 512;
+  const fg = fc.getContext('2d');
+  const frg = fg.createRadialGradient(256, 256, 0, 256, 256, 256);
+  frg.addColorStop(0, 'rgba(14,15,18,.8)'); frg.addColorStop(.3, 'rgba(14,15,18,.86)');
+  frg.addColorStop(.5, 'rgba(14,15,18,.96)'); frg.addColorStop(.8, 'rgba(14,15,18,1)');
+  fg.fillStyle = frg; fg.fillRect(0, 0, 512, 512);
+  const floorTex = new THREE.CanvasTexture(fc); floorTex.encoding = THREE.sRGBEncoding;
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(36, 36).rotateX(-Math.PI / 2),
+    new THREE.MeshBasicMaterial({ map: floorTex, transparent: true, depthWrite: false, toneMapped: false,
+      stencilWrite: true, stencilRef: 1, stencilFunc: THREE.NotEqualStencilFunc }));
+  floor.position.y = FLOOR; floor.renderOrder = 2; scene.add(floor);
+  // soft shadow of the board on the floor
+  const floorShadow = new THREE.Mesh(new THREE.PlaneGeometry(36, 36).rotateX(-Math.PI / 2),
+    new THREE.ShadowMaterial({ opacity: .35, depthWrite: false, stencilWrite: true, stencilRef: 1,
+      stencilFunc: THREE.NotEqualStencilFunc }));
+  floorShadow.position.y = FLOOR + .002; floorShadow.receiveShadow = true; floorShadow.renderOrder = 3; scene.add(floorShadow);
+
+  // camera: in front of White, a little to the left, fairly low angle
+  const camera = new THREE.PerspectiveCamera(27, 1, .1, 120);
+  const target = new THREE.Vector3(0, -.55, .55);
+  function resize() {
+    const w = stage.clientWidth, h = stage.clientHeight;
+    renderer.setSize(w, h, false); renderer.domElement.style.width = w + 'px'; renderer.domElement.style.height = h + 'px';
+    camera.aspect = w / h;
+    const k = Math.max(1, 1.55 / camera.aspect);             // step back on narrow screens
+    camera.position.set(-8.3 * k, 7.2 * k, 13.6 * k); camera.lookAt(target);
+    camera.updateProjectionMatrix();
+  }
+  new ResizeObserver(resize).observe(stage); resize();
+
+  // GET STARTED sits on the empty middle of the board (between ranks 4 and 5): each frame we find
+  // where the board centre is on the screen and move the button there
+  const cta = document.getElementById('cta');
+  const centre = new THREE.Vector3();
+  function placeButton() {
+    centre.set(0, 0, 0); turn.localToWorld(centre); centre.project(camera);
+    cta.style.left = ((centre.x + 1) / 2 * stage.clientWidth) + 'px';
+    cta.style.top = ((1 - centre.y) / 2 * stage.clientHeight) + 'px';
+  }
+
+  // animation: very slow idle sway; on click the board turns, then the PREDICT page opens
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const clock = new THREE.Clock();
+  let spin = null;
+  const ease = (t) => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  function start() {
+    if (spin) return;
+    cta.classList.add('gone');
+    spin = { t0: clock.getElapsedTime(), from: turn.rotation.y, dur: reduce ? .2 : 1.3 };
+  }
+  stage.addEventListener('click', start);
+  cta.addEventListener('click', (e) => { e.stopPropagation(); start(); });
+
+  // when the board is scrolled out of view, stop drawing it (saves the laptop's graphics chip -> smooth scrolling)
+  let onScreen = true;
+  new IntersectionObserver((e) => { onScreen = e[0].isIntersecting; }).observe(stage);
+
+  window.__frames = 0;                      // counted for the smoothness check
+  (function loop() {
+    requestAnimationFrame(loop);
+    if (!onScreen && !spin) return;
+    const t = clock.getElapsedTime();
+    if (spin) {
+      const p = Math.min(1, (t - spin.t0) / spin.dur);
+      turn.rotation.y = spin.from + ease(p) * Math.PI / 2;
+      if (p >= 1 && !spin.done) { spin.done = true; goPredict(); }
+    } else if (!reduce) {
+      turn.rotation.y = Math.sin(t * .22) * .06;
+    }
+    renderer.render(scene, camera);
+    if (!spin) placeButton();
+    window.__frames++;
+  })();
+}
+</script>
+</body>
+</html>

@@ -12,9 +12,11 @@ CSET-211 Statistical Machine Learning project, Bennett University. Author: Jia J
    There are also models for 15, 20, 25 and 30 moves.
 2. **Groups players by playing style** (K-Means clustering). It uses how they play their first 10 moves:
    castling, captures, material swings, development, mobility and opening variety. Ratings and results are not used.
-3. **Web app** (Streamlit). Upload a PGN file (one or many games) or paste moves. For each game, the app uses
+3. **Web app** (Streamlit, four pages: Home with a 3D chessboard made with three.js, Predict, The Model,
+   How It's Different). Upload a PGN file (one or many games) or paste moves. For each game, the app uses
    the latest cutoff the game has reached and shows the chance of each result. For every player with 5 or more
-   games in the file, it also shows their style group.
+   games in the file, it also shows their style group. The first, simpler version of the app is kept as
+   `app_classic.py`.
 
 ## Main results
 Data: Lichess blitz games from 1 January 2025
@@ -47,7 +49,8 @@ All tables are in `results/` (CSV + PNG). The notebook `notebook/chess_midterm_p
    pip install -r requirements.txt
    streamlit run app.py
    ```
-2. Open http://localhost:8501 in a browser. Try `data/demo_games.pgn` or a file from `data/sample_pgn/`.
+2. Open http://localhost:8501 in a browser. Try `data/demo_games.pgn` (or press TRY SAMPLE GAMES on the Predict page)
+   or a file from `data/sample_pgn/`. The 3D home page needs internet (three.js is loaded from a CDN); without 3D it shows a flat board.
 3. Stockfish (optional, but more accurate): install it ([stockfishchess.org](https://stockfishchess.org/download/)) so the
    command `stockfish` works. You can also put the Windows exe at
    `tools/stockfish/stockfish/stockfish-windows-x86-64-universal.exe`.
@@ -80,7 +83,7 @@ Stockfish 19 was used for all evaluations.
 
 ## Folders
 - `src/`: all code (features, data building, experiments, training, clustering, prediction)
-- `app.py`: the Streamlit app
+- `app.py`: the Streamlit app (pages); `ui/`: its look (CSS) and the 3D board/pieces (three.js); `app_classic.py`: the first, simple version
 - `models/`: saved models (joblib)
 - `results/`: result tables and charts
 - `notebook/`: the notebook
